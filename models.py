@@ -10,10 +10,7 @@ class Product:
 class GreenTea(Product):
     # The CEO is a big fan of buy-one-get-one-free offers and green tea
     def apply_discount(self, quantity):
-        if quantity % 2 == 0:
-            return self.price * quantity / 2
-        else:
-            return self.price * quantity
+        return self.price * (quantity // 2 + quantity % 2)
         
 class Strawberries(Product):
     # If you buy 3 or more strawberries, the price should drop to 4.50€
@@ -41,12 +38,14 @@ class Cart:
         self.items = {}
 
     def add(self, product_code, quantity):
+        # Add a product or update quantity
         if product_code in self.items:
             self.items[product_code] += quantity
         else:
             self.items[product_code] = quantity
     
     def total(self, products):
+        # Apply discounts and calculate total price
         total_price = 0.0
         for product_code, quantity in self.items.items():
             p = products.get(product_code)
