@@ -55,7 +55,7 @@ async def get_one(code: str):
 @app.get("/cart/")
 async def get_cart_total():
     with Session(engine) as session:
-        return {"total": cart.total(session)}
+        return {"items": cart.items, "total": cart.total(session)}
     
 @app.post("/cart/")
 async def add_to_cart(item: CartItem):
@@ -66,3 +66,27 @@ async def add_to_cart(item: CartItem):
             return {"error": "Product not found"}
         cart.add(item.code, item.quantity)
         return {"message": f"Added {item.quantity} x {item.code} to cart"}
+    
+@app.delete("/cart/{code}")
+async def delete_from_cart(code: str):
+    with Session(engine) as session:
+        statement = select(Product).where(Product.code == code)
+        product = session.exec(statement).first()
+        if not product:
+            return {"error": "Product not found"}
+        if code not in cart.items:
+            return {"error": "Product not in cart"}
+        cart.remove(code)
+        return {"message": f"Removed {code} from cart"}
+
+@app.put("/cart/{code}")
+async def update_item(code: str, item: CartItem):
+    with Session(engine) as session:
+        statement = select(Product).where(Product.code == code)
+        product = session.exec(statement).first()
+        if not product:
+            return {"error": "Product not found"}
+        if code not in cart.items:
+            return {"error": "Product not in cart"}
+        cart.update(code, item.quantity)
+        return {"message": f"Updated quantity for {code}: {item.quantity}"}

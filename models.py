@@ -45,6 +45,13 @@ class Cart:
             self.items[product_code] += quantity
         else:
             self.items[product_code] = quantity
+
+    def remove(self, product_code):
+        # Remove product from cart
+        self.items.pop(product_code)
+
+    def update(self, product_code, quantity):
+        self.items[product_code] = quantity
         
     def total(self, session: Session):
         total_price = 0.0
@@ -69,4 +76,4 @@ class Cart:
 
 class CartItem(BaseModel):
     code: str
-    quantity: int
+    quantity: int = Field(ge=0)
