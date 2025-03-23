@@ -1,32 +1,68 @@
 from fastapi import FastAPI
-from models import products, Cart
+from sqlmodel import Session, SQLModel, create_engine, select
+from .models import Product, Cart, CartItem
+
+
+def create_products():
+    products = [
+        {"code": "gr1", "name": "Green Tea", "price": 3.11},
+        {"code": "sr1", "name": "Strawberries", "price": 5.00},
+        {"code": "cf1", "name": "Coffee", "price": 11.23},
+    ]
+
+    with Session(engine) as session:
+        for prod in products:
+            existing_product = session.exec(select(Product).where(Product.code == prod["code"])).first()
+            if not existing_product:
+                new_product = Product(**prod)
+                session.add(new_product)
+        
+        session.commit()
 
 app = FastAPI()
 cart = Cart()
 
+# Initialize DB
+engine = create_engine("sqlite:///database.db")
+SQLModel.metadata.create_all(engine)
+
+# Insert products
+create_products()
+
+
 # API for products
 @app.get("/products/")
 async def get_all():
-    return [
-        {"code": p.product_code, "name": p.name, "price": p.price}
-        for p in products.values()
-    ]
+    with Session(engine) as session:
+        statement = select(Product)
+        results = session.exec(statement)
+        return [
+            {"code": res.code, "name": res.name, "price": res.price}
+            for res in results
+        ]
 
 @app.get("/products/{code}")
-async def get_one(code):
-    product = products.get(code)
-    if not product:
-        return {"error": "Product not found"}
-    return {"code": product.product_code, "name": product.name, "price": product.price}
+async def get_one(code: str):
+    with Session(engine) as session:
+        statement = select(Product).where(Product.code == code)
+        product = session.exec(statement).first()
+        if not product:
+            return {"error": "Product not found"}
+        return {"code": product.code, "name": product.name, "price": product.price}
+    
 
 # API for shopping cart
 @app.get("/cart/")
 async def get_cart_total():
-    return {"total": cart.total(products)}
-
+    with Session(engine) as session:
+        return {"total": cart.total(session)}
+    
 @app.post("/cart/")
-async def add_to_cart(product_code, quantity):
-    if product_code not in products:
-        return {"error": "Product not found"}
-    cart.add(product_code, quantity)
-    return {"message": f"Added {quantity} x {product_code} to cart"}
+async def add_to_cart(item: CartItem):
+    with Session(engine) as session:
+        statement = select(Product).where(Product.code == item.code)
+        product = session.exec(statement).first()
+        if not product:
+            return {"error": "Product not found"}
+        cart.add(item.code, item.quantity)
+        return {"message": f"Added {item.quantity} x {item.code} to cart"}
