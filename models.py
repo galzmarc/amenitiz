@@ -3,10 +3,10 @@ from pydantic import BaseModel
 
 
 class Product(SQLModel, table=True):
-    __table_args__ = {'keep_existing': True} # Had to add this to create the tests
+    __table_args__ = {'keep_existing': True} # Had to add this line to write the tests
     code: str = Field(default=None, primary_key=True)
     name: str
-    price: float
+    price: float = Field(ge=0) # Added field validation, non negative
 
     def apply_discount(self, quantity):
         return self.price * quantity
@@ -32,7 +32,7 @@ class Coffee():
     def __init__(self, product: Product):
         self.product = product
 
-    # If 3 or more, price is 2/3 of original price
+    # If you buy 3 or more, price is 2/3 of original price
     def apply_discount(self, quantity):
         unit_price = (2 / 3) * self.product.price if quantity >= 3 else self.product.price
         return unit_price * quantity
@@ -53,9 +53,11 @@ class Cart:
         self.items.pop(product_code)
 
     def update(self, product_code, quantity):
+        # Update quantity of a product in the cart
         self.items[product_code] = quantity
         
     def total(self, session: Session):
+        # Get total price (with discounts) of items in the cart
         total_price = 0.0
 
         for product_code, quantity in self.items.items():
@@ -78,4 +80,4 @@ class Cart:
 
 class CartItem(BaseModel):
     code: str
-    quantity: int = Field(ge=0)
+    quantity: int = Field(ge=0) # Added field validation, non negative
