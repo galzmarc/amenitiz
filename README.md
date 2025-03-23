@@ -67,7 +67,6 @@ Response:
 ```
 GET /cart/
 ```
-```
 Response:
 ```
 {
