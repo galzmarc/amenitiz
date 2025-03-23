@@ -3,6 +3,7 @@ from pydantic import BaseModel
 
 
 class Product(SQLModel, table=True):
+    __table_args__ = {'keep_existing': True} # Had to add this to create the tests
     code: str = Field(default=None, primary_key=True)
     name: str
     price: float
@@ -13,7 +14,8 @@ class Product(SQLModel, table=True):
 class GreenTea():
     def __init__(self, product: Product):
         self.product = product
-
+    
+    # Buy 1 Get 1 Free
     def apply_discount(self, quantity):
         return self.product.price * (quantity // 2 + quantity % 2)
     
@@ -60,17 +62,17 @@ class Cart:
             product = session.exec(select(Product).where(Product.code == product_code)).first()
             
             if product:
-                    # Apply discount based on product type
-                    if product_code == "gr1":
-                        discounted_product = GreenTea(product)
-                    elif product_code == "sr1":
-                        discounted_product = Strawberries(product)
-                    elif product_code == "cf1":
-                        discounted_product = Coffee(product)
-                    else:
-                        discounted_product = product
-                    
-                    total_price += discounted_product.apply_discount(quantity)
+                # Apply discount based on product type
+                if product_code == "gr1":
+                    discounted_product = GreenTea(product)
+                elif product_code == "sr1":
+                    discounted_product = Strawberries(product)
+                elif product_code == "cf1":
+                    discounted_product = Coffee(product)
+                else:
+                    discounted_product = product
+                
+                total_price += discounted_product.apply_discount(quantity)
 
         return total_price
 
