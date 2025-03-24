@@ -39,28 +39,31 @@ class Coffee():
 
 class Cart:
     def __init__(self):
-        self.items = {}
+        self.items = {} # { { product_code: { product_name, quantity } }
 
-    def add(self, product_code, quantity):
+    def add(self, product_code, product_name, quantity):
         # Add a product or update quantity
         if product_code in self.items:
-            self.items[product_code] += quantity
+            self.items[product_code]["quantity"] += quantity
         else:
-            self.items[product_code] = quantity
+            self.items[product_code] = {"name": product_name, "quantity": quantity}
 
     def remove(self, product_code):
         # Remove product from cart
-        self.items.pop(product_code)
+        if product_code in self.items:
+            self.items.pop(product_code)
 
     def update(self, product_code, quantity):
-        # Update quantity of a product in the cart
-        self.items[product_code] = quantity
-        
+        if product_code in self.items:
+            self.items[product_code]["quantity"] = quantity
+
     def total(self, session: Session):
         # Get total price (with discounts) of items in the cart
         total_price = 0.0
 
-        for product_code, quantity in self.items.items():
+        for product_code, details in self.items.items():
+            quantity = details["quantity"]
+
             product = session.exec(select(Product).where(Product.code == product_code)).first()
             
             if product:

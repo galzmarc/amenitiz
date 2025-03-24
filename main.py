@@ -44,7 +44,6 @@ async def get_all(session: Session = Depends(get_session)):
 
 @app.get("/products/{code}")
 # This endpoint is actually never used, but it might come in handy if we expand the app.
-# Took me 2 secs to write, so there is no point in deleting
 async def get_one(*, session: Session = Depends(get_session), code: str):
     statement = select(Product).where(Product.code == code)
     product = session.exec(statement).first()
@@ -64,7 +63,7 @@ async def add_to_cart(*, session: Session = Depends(get_session), item: CartItem
     product = session.exec(statement).first()
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
-    cart.add(item.code, item.quantity)
+    cart.add(item.code, product.name, item.quantity)
     return {"message": f"Added {item.quantity} x {item.code} to cart"}
 
 @app.put("/cart/{code}")

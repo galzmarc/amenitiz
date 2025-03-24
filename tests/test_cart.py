@@ -33,8 +33,8 @@ def test_coffee_discount():
 
 def test_cart_add_remove():
     cart = Cart()
-    cart.add("gr1", 2)
-    assert cart.items["gr1"] == 2
+    cart.add("gr1", "Green Tea", 2)
+    assert cart.items["gr1"] == {'name': 'Green Tea', 'quantity': 2}
 
     cart.remove("gr1")
     assert "gr1" not in cart.items
@@ -71,6 +71,8 @@ def session_fixture():
 def test_cart_total(items, expected_total, session: Session):
     cart = Cart()
     for item in items:
-        cart.add(item, 1) 
+        statement = select(Product).where(Product.code == item)
+        product = session.exec(statement).first()
+        cart.add(product.code, product.name, 1) 
 
     assert cart.total(session) == expected_total
