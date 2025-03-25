@@ -83,3 +83,8 @@ Response:
   "total": 16.61
 }
 ```
+
+## User Interface
+
+![Product page](https://github.com/user-attachments/assets/af470ec4-3cb1-493e-9878-208349431d59)
+![Cart page](https://github.com/user-attachments/assets/f4b64bbf-f458-40ac-8b14-24f3ff0901a3)
