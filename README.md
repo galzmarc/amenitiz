@@ -71,8 +71,14 @@ Response:
 ```
 {
   "items": {
-    "sr1": 3,
-    "gr1": 1
+    "sr1": {
+      "name": "Strawberries",
+      "quantity": 3
+    },
+    "gr1": {
+      "name": "Green Tea",
+      "quantity": 2
+    }
   },
   "total": 16.61
 }
