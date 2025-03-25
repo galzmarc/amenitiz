@@ -1,6 +1,9 @@
 from fastapi import Depends, FastAPI, HTTPException
 from sqlmodel import Session, SQLModel, create_engine, select
-from .models import Product, Cart, CartItem
+from fastapi.middleware.cors import CORSMiddleware
+
+from models import Product, Cart, CartItem
+
 
 def get_session():
     with Session(engine) as session:
@@ -31,6 +34,16 @@ SQLModel.metadata.create_all(engine)
 # Insert products
 create_products()
 
+# ----- Middleware -----
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # ----- API for products -----
 
 @app.get("/products/")
@@ -43,7 +56,7 @@ async def get_all(session: Session = Depends(get_session)):
     ]
 
 @app.get("/products/{code}")
-# This endpoint is actually never used, but it might come in handy if we expand the app.
+# This endpoint is actually never used, but it might come in handy if we expand the app
 async def get_one(*, session: Session = Depends(get_session), code: str):
     statement = select(Product).where(Product.code == code)
     product = session.exec(statement).first()
