@@ -1,0 +1,24 @@
+:root {
+  --bg-color: rgb(242, 242, 247);
+  --primary-color: #6B69D6;
+  --secondary-color: #8E8CD8;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  background-color: var(--bg-color);
+}
+
+.cart-icon {
+  font-size: 2rem;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.cart-icon:hover {
+  transform: scale(1.1);
+}
