@@ -1,9 +1,15 @@
 # Cash Register API
 
-This is a cash register (shopping cart) API built with FastAPI and SQLModel, implementing a checkout system with product discounts.
+This is a cash register (shopping cart) API built with FastAPI and SQLModel, implementing a checkout system with product discounts. The frontend is built with React.
 
 ### Requirements
 Add products to a cart and compute the total price. Items may be added in any order.
+
+### Design Approach
+- I chose FastAPI because of its speed, ease of iteration, and built-in support for modern features like automatic OpenAPI documentation.
+- Initially, the "/products" endpoint was managed through an array of objects, but I later transitioned to using an SQLite database to better model product data and make it more scalable.
+- The shopping cart is currently implemented as an in-memory data structure, whose shared state might lead to concurrency issues or incorrect behavior. For a production environment, I would consider an in-memory cache or session-based storage.
+- The project follows a clear separation of concerns, with the backend handling business logic and the frontend interacting through API calls. 
 
 ## Discount Rules
 
