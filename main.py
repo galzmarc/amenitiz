@@ -1,7 +1,7 @@
 from fastapi import Depends, FastAPI, HTTPException
 from sqlmodel import Session, SQLModel, create_engine, select
 
-from models import Product, Cart, CartItem
+from .models import Product, Cart, CartItem
 
 
 def get_session():

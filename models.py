@@ -1,6 +1,8 @@
 from sqlmodel import Field, SQLModel, Session, SQLModel, select
 from pydantic import BaseModel
+from abc import ABC, abstractmethod
 
+# --- Using the Strategy Design Pattern ---
 
 class Product(SQLModel, table=True):
     __table_args__ = {'keep_existing': True} # Had to add this line to write the tests
@@ -10,36 +12,41 @@ class Product(SQLModel, table=True):
 
     def apply_discount(self, quantity):
         return self.price * quantity
-    
-class GreenTea():
-    def __init__(self, product: Product):
-        self.product = product
-    
+
+class DiscountStrategy(ABC):
+    @abstractmethod
+    def apply_discount(self, product: Product, quantity: int) -> float:
+        pass
+
+class GreenTeaDiscount(DiscountStrategy):    
     # Buy 1 Get 1 Free
-    def apply_discount(self, quantity):
-        return self.product.price * (quantity // 2 + quantity % 2)
+    def apply_discount(self, product: Product, quantity: int) -> float:
+        return product.price * (quantity // 2 + quantity % 2)
     
-class Strawberries():
-    def __init__(self, product: Product):
-        self.product = product
-
+class StrawberriesDiscount(DiscountStrategy):
     # If you buy 3 or more strawberries, the price should drop to 4.50€
-    def apply_discount(self, quantity):
-        unit_price = 4.50 if quantity >= 3 else self.product.price
+    def apply_discount(self, product: Product, quantity: int) -> float:
+        unit_price = 4.50 if quantity >= 3 else product.price
         return unit_price * quantity
 
-class Coffee():
-    def __init__(self, product: Product):
-        self.product = product
-
+class CoffeeDiscount(DiscountStrategy):
     # If you buy 3 or more, price is 2/3 of original price
-    def apply_discount(self, quantity):
-        unit_price = (2 / 3) * self.product.price if quantity >= 3 else self.product.price
+    def apply_discount(self, product: Product, quantity: int) -> float:
+        unit_price = (2 / 3) * product.price if quantity >= 3 else product.price
         return unit_price * quantity
+
+class NoDiscount(DiscountStrategy):
+    def apply_discount(self, product: Product, quantity: int) -> float:
+        return product.price * quantity
 
 class Cart:
-    def __init__(self):
+    def __init__(self, strategy_map=None):
         self.items = {} # { { product_code: { product_name, quantity } }
+        self.strategy_map = strategy_map or {
+            "gr1": GreenTeaDiscount(),
+            "sr1": StrawberriesDiscount(),
+            "cf1": CoffeeDiscount()
+        }
 
     def add(self, product_code, product_name, quantity):
         # Add a product or update quantity
@@ -49,7 +56,6 @@ class Cart:
             self.items[product_code] = {"name": product_name, "quantity": quantity}
 
     def remove(self, product_code):
-        # Remove product from cart
         if product_code in self.items:
             self.items.pop(product_code)
 
@@ -68,16 +74,8 @@ class Cart:
             
             if product:
                 # Apply discount based on product type
-                if product_code == "gr1":
-                    discounted_product = GreenTea(product)
-                elif product_code == "sr1":
-                    discounted_product = Strawberries(product)
-                elif product_code == "cf1":
-                    discounted_product = Coffee(product)
-                else:
-                    discounted_product = product
-                
-                total_price += discounted_product.apply_discount(quantity)
+                strategy = self.strategy_map.get(product_code, NoDiscount())
+                total_price += strategy.apply_discount(product, quantity)
 
         return total_price
 
