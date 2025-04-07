@@ -1,6 +1,6 @@
 # Cash Register API
 
-This is a cash register (shopping cart) API built with FastAPI and SQLModel, implementing a checkout system with product discounts. The frontend is built with React.
+This is a cash register (shopping cart) API built with FastAPI and SQLModel, implementing a checkout system with product discounts.
 
 ### Requirements
 Add products to a cart and compute the total price. Items may be added in any order.
@@ -89,8 +89,3 @@ Response:
   "total": 16.61
 }
 ```
-
-## User Interface
-
-![Product page](https://github.com/user-attachments/assets/af470ec4-3cb1-493e-9878-208349431d59)
-![Cart page](https://github.com/user-attachments/assets/f4b64bbf-f458-40ac-8b14-24f3ff0901a3)
