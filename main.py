@@ -1,6 +1,5 @@
 from fastapi import Depends, FastAPI, HTTPException
 from sqlmodel import Session, SQLModel, create_engine, select
-from fastapi.middleware.cors import CORSMiddleware
 
 from models import Product, Cart, CartItem
 
@@ -34,15 +33,6 @@ SQLModel.metadata.create_all(engine)
 # Insert products
 create_products()
 
-# ----- Middleware -----
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 # ----- API for products -----
 
@@ -63,6 +53,7 @@ async def get_one(*, session: Session = Depends(get_session), code: str):
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
     return {"code": product.code, "name": product.name, "price": product.price}
+
 
 # ----- API for shopping cart -----
 
